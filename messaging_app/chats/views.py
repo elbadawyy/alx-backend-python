@@ -2,14 +2,19 @@
 """
 Views for messaging app.
 """
-
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 
 from .permissions import IsParticipantOfConversation
 from .models import Message, Conversation
 from .serializers import MessageSerializer, ConversationSerializer
+from .pagination import MessagePagination
+from .filters import MessageFilter
+
+
 
 
 class MessageViewSet(viewsets.ModelViewSet):
@@ -23,7 +28,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         conversation = get_object_or_404(Conversation, id=conversation_id)
 
         if not conversation.participants.filter(id=self.request.user.id).exists():
-            raise PermissionDenied(detail="You are not a participant of this conversation.")
+            raise PermissionDenied("You are not a participant of this conversation.")
 
         return Message.objects.filter(conversation=conversation).order_by('-created_at')
 
@@ -32,9 +37,10 @@ class MessageViewSet(viewsets.ModelViewSet):
         conversation = get_object_or_404(Conversation, id=conversation_id)
 
         if not conversation.participants.filter(id=self.request.user.id).exists():
-            return Response({"error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+            raise PermissionDenied("You are not a participant of this conversation.")
 
         serializer.save(sender=self.request.user, conversation=conversation)
+
 
 
 

@@ -1,0 +1,170 @@
+{
+	"info": {
+		"_postman_id": "896ae094-16dd-4ffe-ae71-e9d26a778f0b",
+		"name": "messaging_app",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"badawy\",\n    \"password\": \"123456\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/auth/login/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"auth",
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "conversations",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0MzU4NDYyLCJpYXQiOjE3NjQzNTY2NjIsImp0aSI6ImI1NjEwNDY5MjcwYzQwNGQ4ZmNmMzgzNDZjNjg2ZjlmIiwidXNlcl9pZCI6MX0.s_2DxXtYl7AMyPTaR6FHwDSHWWb0YFysi0SS-n9-Al8",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Test Conversation\",\n    \"participants\": [1, 1]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/conversations/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"conversations",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "messages",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0MzU4NDYyLCJpYXQiOjE3NjQzNTY2NjIsImp0aSI6ImI1NjEwNDY5MjcwYzQwNGQ4ZmNmMzgzNDZjNjg2ZjlmIiwidXNlcl9pZCI6MX0.s_2DxXtYl7AMyPTaR6FHwDSHWWb0YFysi0SS-n9-Al8",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"content\": \"Hello ALX!\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/conversations/1/messages/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"conversations",
+						"1",
+						"messages",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fetch messages",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0MzU4NDYyLCJpYXQiOjE3NjQzNTY2NjIsImp0aSI6ImI1NjEwNDY5MjcwYzQwNGQ4ZmNmMzgzNDZjNjg2ZjlmIiwidXNlcl9pZCI6MX0.s_2DxXtYl7AMyPTaR6FHwDSHWWb0YFysi0SS-n9-Al8",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/conversations/1/messages/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"conversations",
+						"1",
+						"messages",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
