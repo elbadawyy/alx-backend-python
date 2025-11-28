@@ -1,24 +1,22 @@
-from django.http import HttpResponseForbidden
+# chats/middleware.py
+from datetime import datetime
+import logging
 
-class RolepermissionMiddleware:
+# Set up logger
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='requests.log', level=logging.INFO)
+
+class RequestLoggingMiddleware:
+    """
+    Middleware to log user requests with timestamp, user, and path.
+    """
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        # Only restrict access to certain paths, e.g., admin/mod-only actions
-        protected_paths = ['/chat/manage/', '/chat/delete/', '/chat/moderate/']
-        
-        if request.path in protected_paths:
-            user = request.user
-            if not user.is_authenticated:
-                return HttpResponseForbidden("Authentication required.")
+        user = request.user if request.user.is_authenticated else "Anonymous"
+        logger.info(f"{datetime.now()} - User: {user} - Path: {request.path}")
 
-            # Check for admin or moderator roles
-            user_roles = getattr(user, 'groups', None)
-            if user.is_superuser:
-                return self.get_response(request)
-
-            if not user_roles.filter(name__in=['admin', 'moderator']).exists():
-                return HttpResponseForbidden("You do not have permission to access this resource.")
-        
-        return self.get_response(request)
+        # Call the next middleware/view
+        response = self.get_response(request)
+        return response
