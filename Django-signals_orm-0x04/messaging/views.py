@@ -38,7 +38,9 @@ def view_thread(request, message_id):
 
 def unread_messages_view(request):
     # Ensure only messages for the logged-in user are returned
-    unread_messages = Message.unread.for_user(request.user)
+    unread_messages = Message.unread.unread_for_user(request.user).only(
+        "id", "sender", "content", "created_at"
+    )
 
     return render(request, "messaging/unread_messages.html", {
         "unread_messages": unread_messages
