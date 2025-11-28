@@ -1,0 +1,8 @@
+<div style="margin-left: {{ level|default:0 }}px; border-left: 1px solid #ddd; padding-left: 10px; margin-top: 10px;">
+    <p><strong>{{ message.sender.username }}</strong>: {{ message.content }}</p>
+    <small>{{ message.timestamp }}</small>
+
+    {% for reply in message.replies.all %}
+        {% include "message_block.html" with message=reply level=level|add:20 %}
+    {% endfor %}
+</div>
