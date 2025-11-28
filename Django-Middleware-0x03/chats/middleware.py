@@ -43,3 +43,56 @@ class RestrictAccessByTimeMiddleware:
         return response
 
 
+
+# Dictionary to track messages per IP
+ip_message_tracker = {}
+
+class OffensiveLanguageMiddleware:
+    """
+    Middleware to limit chat messages per IP.
+    Example: max 5 messages per 1 minute.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.max_messages = 5
+        self.time_window = timedelta(minutes=1)
+
+    def __call__(self, request):
+        # Only apply for POST requests to send messages
+        if request.method == "POST" and "messages" in request.path:
+            ip = self.get_client_ip(request)
+            now = datetime.now()
+            
+            # Initialize tracker for new IP
+            if ip not in ip_message_tracker:
+                ip_message_tracker[ip] = []
+            
+            # Remove timestamps outside the time window
+            ip_message_tracker[ip] = [
+                timestamp for timestamp in ip_message_tracker[ip]
+                if now - timestamp < self.time_window
+            ]
+
+            # Check if max messages exceeded
+            if len(ip_message_tracker[ip]) >= self.max_messages:
+                return JsonResponse(
+                    {"error": "Too many messages, please wait before sending more."},
+                    status=429
+                )
+
+            # Log current message timestamp
+            ip_message_tracker[ip].append(now)
+
+        response = self.get_response(request)
+        return response
+
+    @staticmethod
+    def get_client_ip(request):
+        # Try to get IP from X-Forwarded-For header if behind proxy
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(",")[0]
+        else:
+            ip = request.META.get("REMOTE_ADDR")
+        return ip
+
