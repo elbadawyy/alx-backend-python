@@ -96,6 +96,7 @@ class OffensiveLanguageMiddleware:
             ip = request.META.get("REMOTE_ADDR")
         return ip
 
+
 class RolePermissionMiddleware:
     """
     Middleware to restrict access based on user role.
