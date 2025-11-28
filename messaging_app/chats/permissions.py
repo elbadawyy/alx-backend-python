@@ -3,12 +3,12 @@
 Custom permissions for messaging app.
 """
 
-from rest_framework.permissions import BasePermission
+from rest_framework import permissions
 
 
-class IsOwnerOfMessage(BasePermission):
+class IsOwnerOfMessage(permissions.BasePermission):
     """
-    Allow users to access ONLY their own messages.
+    Allow users to access ONLY their own messages and conversations.
     """
 
     def has_object_permission(self, request, view, obj):
