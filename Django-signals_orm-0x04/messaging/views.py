@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from .utils import get_thread
+from django.views.decorators.cache import cache_page
 
 
 @login_required
@@ -57,3 +58,14 @@ def read_message(request, message_id):
     return render(request, "messaging/read_message.html", {
         "message": message
     })
+    
+@cache_page(60)  # cache for 60 seconds
+def conversation_messages(request, conversation_id):
+    messages = Message.objects.filter(conversation_id=conversation_id)
+    return render(request, "messages/list.html", {"messages": messages})
+
+
+@cache_page(60)
+def message_list(request):
+    messages = Message.objects.all().order_by("-created_at")
+    return render(request, "messages/list.html", {"messages": messages})
