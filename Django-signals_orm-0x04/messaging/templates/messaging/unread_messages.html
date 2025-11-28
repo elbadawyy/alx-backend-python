@@ -1,0 +1,14 @@
+<h2>Unread Messages</h2>
+
+{% for msg in unread_messages %}
+    <div>
+        <strong>From:</strong> {{ msg.sender.username }}<br>
+        <p>{{ msg.content }}</p>
+        <small>{{ msg.created_at }}</small>
+        <br>
+        <a href="{% url 'read_message' msg.id %}">Open</a>
+    </div>
+    <hr>
+{% empty %}
+    <p>No unread messages.</p>
+{% endfor %}
