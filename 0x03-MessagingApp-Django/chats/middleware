@@ -2,26 +2,24 @@
 from datetime import datetime
 import logging
 
-# Configure the logger
+# Set up logger
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-file_handler = logging.FileHandler('requests.log')
-formatter = logging.Formatter('%(message)s')
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
+logging.basicConfig(filename='requests.log', level=logging.INFO)
 
 class RequestLoggingMiddleware:
+    """
+    Middleware to log user requests with timestamp, user, and path.
+    """
     def __init__(self, get_response):
-        self.get_response = get_response  # Django passes this automatically
+        self.get_response = get_response
 
     def __call__(self, request):
         user = request.user if request.user.is_authenticated else "Anonymous"
-        log_message = f"{datetime.now()} - User: {user} - Path: {request.path}"
-        logger.info(log_message)
+        logger.info(f"{datetime.now()} - User: {user} - Path: {request.path}")
 
-        response = self.get_response(request)  # continue to next middleware/view
+        # Call the next middleware/view
+        response = self.get_response(request)
         return response
-    
     
 class RestrictAccessByTimeMiddleware:
     """
@@ -44,3 +42,85 @@ class RestrictAccessByTimeMiddleware:
         response = self.get_response(request)
         return response
 
+
+
+# Dictionary to track messages per IP
+ip_message_tracker = {}
+
+class OffensiveLanguageMiddleware:
+    """
+    Middleware to limit chat messages per IP.
+    Example: max 5 messages per 1 minute.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.max_messages = 5
+        self.time_window = timedelta(minutes=1)
+
+    def __call__(self, request):
+        # Only apply for POST requests to send messages
+        if request.method == "POST" and "messages" in request.path:
+            ip = self.get_client_ip(request)
+            now = datetime.now()
+            
+            # Initialize tracker for new IP
+            if ip not in ip_message_tracker:
+                ip_message_tracker[ip] = []
+            
+            # Remove timestamps outside the time window
+            ip_message_tracker[ip] = [
+                timestamp for timestamp in ip_message_tracker[ip]
+                if now - timestamp < self.time_window
+            ]
+
+            # Check if max messages exceeded
+            if len(ip_message_tracker[ip]) >= self.max_messages:
+                return JsonResponse(
+                    {"error": "Too many messages, please wait before sending more."},
+                    status=429
+                )
+
+            # Log current message timestamp
+            ip_message_tracker[ip].append(now)
+
+        response = self.get_response(request)
+        return response
+
+    @staticmethod
+    def get_client_ip(request):
+        # Try to get IP from X-Forwarded-For header if behind proxy
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(",")[0]
+        else:
+            ip = request.META.get("REMOTE_ADDR")
+        return ip
+
+
+class RolePermissionMiddleware:
+    """
+    Middleware to restrict access based on user role.
+    Only 'admin' and 'moderator' can access certain actions.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Only check for authenticated users
+        if request.user.is_authenticated:
+            # Check role
+            if hasattr(request.user, 'role'):
+                if request.user.role not in ['admin', 'moderator']:
+                    return JsonResponse(
+                        {"error": "Forbidden: You do not have permission to perform this action."},
+                        status=403
+                    )
+        else:
+            # If not authenticated, block access
+            return JsonResponse(
+                {"error": "Forbidden: Authentication required."},
+                status=403
+            )
+
+        response = self.get_response(request)
+        return response
